@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c1118">
+  <meta name="remy-build" content="phase-c">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Music Room">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Remy's Music Room — a calm, visual app for music, choices, and connection. Family can sign in to share Remy's day.">
+  <title>Remy's Music Room</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="auth-locked">
+
+  <div id="auth-gate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-card">
+      <div class="brand-mark auth-mark"><img src="icons/icon-192.png" alt=""></div>
+      <h1 id="auth-title">Remy's Music Room</h1>
+      <p class="sub" id="auth-sub">A calm space for Remy — sign in to share it with family</p>
+      <div id="auth-error" class="auth-error hidden" role="alert"></div>
+
+      <form id="auth-signin" autocomplete="on">
+        <label for="auth-email">Email</label>
+        <input id="auth-email" name="email" type="email" inputmode="email" autocomplete="username" required placeholder="you@example.com">
+        <label for="auth-password">Password</label>
+        <input id="auth-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="primary" type="submit">Sign in</button>
+        <div class="auth-links">
+          <button type="button" class="linkish" data-auth-show="setup">Set password with setup code</button>
+          <button type="button" class="linkish" data-auth-show="join">Join with invite code</button>
+        </div>
+      </form>
+
+      <form id="auth-setup" class="hidden" autocomplete="on">
+        <p class="sub">First time? Enter the email jake@remydata.com, the one-time setup code you were given, and choose a password. Nothing is sent by email.</p>
+        <label for="setup-email">Email</label>
+        <input id="setup-email" name="email" type="email" value="jake@remydata.com" autocomplete="username" required>
+        <label for="setup-code">Setup code</label>
+        <input id="setup-code" name="setup-code" type="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required placeholder="XXXXX-XXXXX">
+        <label for="setup-password">New password (12+ characters)</label>
+        <input id="setup-password" name="new-password" type="password" autocomplete="new-password" minlength="12" required>
+        <label for="setup-password-2">Confirm password</label>
+        <input id="setup-password-2" name="new-password-confirm" type="password" autocomplete="new-password" minlength="12" required>
+        <button class="primary" type="submit">Set password and enter</button>
+        <div class="auth-links">
+          <button type="button" class="linkish" data-auth-show="signin">Back to sign in</button>
+        </div>
+      </form>
+
+      <form id="auth-join" class="hidden" autocomplete="on">
+        <p class="sub">A parent will give you an invite code. Your account is created here — no email is sent.</p>
+        <label for="join-name">Your name</label>
+        <input id="join-name" name="name" type="text" autocomplete="name" required placeholder="Julie">
+        <label for="join-email">Email</label>
+        <input id="join-email" name="email" type="email" autocomplete="username" required>
+        <label for="join-password">Password (12+ characters)</label>
+        <input id="join-password" name="new-password" type="password" autocomplete="new-password" minlength="12" required>
+        <label for="join-password-2">Confirm password</label>
+        <input id="join-password-2" name="new-password-confirm" type="password" autocomplete="new-password" minlength="12" required>
+        <label for="join-code">Invite code</label>
+        <input id="join-code" name="invite-code" type="text" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required placeholder="XXXXX-XXXXX">
+        <button class="primary" type="submit">Join the family</button>
+        <div class="auth-links">
+          <button type="button" class="linkish" data-auth-show="signin">Back to sign in</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- HOME -->
+    <section id="screen-home" class="screen active" data-screen="home">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark"><img src="icons/icon-192.png" alt=""></div>
+          <div>
+            <h1>Remy's Music Room</h1>
+            <div class="sub">Tap a picture to begin</div>
+            <div class="sync-pill" id="sync-pill" data-state="local">On this device</div>
+          </div>
+        </div>
+        <button class="hold-gate" id="parent-gate" type="button" aria-label="Parent settings, press and hold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"></path>
+          </svg>
+          <span class="ring"></span>
+        </button>
+      </header>
+      <div class="grid home-grid" id="home-grid"></div>
+    </section>
+
+    <!-- MUSIC -->
+    <section id="screen-music" class="screen" data-screen="music">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Music</h2>
+          <div class="sub">Pick a beat, then play</div>
+        </div>
+      </header>
+      <div class="grid music-grid" id="music-grid"></div>
+      <div class="dock">
+        <div class="dock-title">
+          <div class="now">Now: <span id="now-playing">Nothing yet</span></div>
+        </div>
+        <button class="big-ctrl" id="music-play" type="button" aria-label="Play">
+          <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="icon-stop" class="hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        </button>
+        <div class="slider-wrap">
+          <label for="tempo">Tempo <span id="tempo-val">100%</span></label>
+          <input id="tempo" type="range" min="80" max="160" value="100" step="5">
+        </div>
+        <button class="chipmunk-toggle" id="chipmunk" type="button" aria-pressed="false">Chipmunk</button>
+      </div>
+    </section>
+
+    <!-- I WANT -->
+    <section id="screen-want" class="screen" data-screen="want">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>I Want</h2>
+          <div class="sub">Tap a picture to say it</div>
+        </div>
+      </header>
+      <div class="grid want-grid" id="want-grid"></div>
+    </section>
+
+    <!-- HUM -->
+    <section id="screen-hum" class="screen" data-screen="hum">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Hum</h2>
+          <div class="sub">Your voice paints the room</div>
+        </div>
+      </header>
+      <div class="hum-stage" id="hum-stage">
+        <canvas id="hum-canvas"></canvas>
+        <div class="hum-intro" id="hum-intro">
+          <h3>Ready when you are</h3>
+          <p>Hum or make a sound. The colors will move with your voice, and the room will play your note back. Nothing is recorded, and nothing leaves this device. Headphones help so the speakers do not pick up the sound.</p>
+          <button class="primary" id="hum-start" type="button">Turn on microphone</button>
+        </div>
+        <div class="hum-denied hidden" id="hum-denied">
+          <h3>Microphone is off</h3>
+          <p>That's okay. Music, I Want, and Games still work. To try Hum, allow the microphone for this page in your browser settings, then tap try again.</p>
+          <button class="primary" id="hum-retry" type="button">Try again</button>
+        </div>
+        <div class="hum-hud hidden" id="hum-hud">
+          <div class="pitch-chip" id="pitch-chip">Listening…</div>
+          <button class="toggle" id="hum-echo" type="button" aria-pressed="false">Chipmunk echo</button>
+          <button class="secondary" id="hum-stop" type="button">Stop listening</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAMES MENU -->
+    <section id="screen-games" class="screen" data-screen="games">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Games</h2>
+          <div class="sub">No scores to lose — just play</div>
+        </div>
+      </header>
+      <div class="grid games-menu-grid" id="games-menu-grid"></div>
+    </section>
+
+    <!-- TAP THE BEAT -->
+    <section id="screen-beat" class="screen" data-screen="beat">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Tap the Beat</h2>
+          <div class="sub">Tap anywhere when you feel it</div>
+        </div>
+      </header>
+      <div class="game-stage" id="beat-stage">
+        <canvas id="beat-canvas"></canvas>
+        <div class="pulse-ring" id="pulse-ring"></div>
+        <button class="beat-hit-area" id="beat-hit" type="button" aria-label="Tap the beat"></button>
+        <div class="beat-hud">
+          <div class="count" id="beat-count">0</div>
+          <div class="cheer" id="beat-cheer">Tap with the pulse</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOUND MATCH -->
+    <section id="screen-match" class="screen" data-screen="match">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Sound Match</h2>
+          <div class="sub">Listen, then pick the picture</div>
+        </div>
+      </header>
+      <div class="game-stage" id="match-stage">
+        <div class="match-actions">
+          <button class="primary" id="match-play" type="button">Hear it again</button>
+          <button class="secondary" id="match-next" type="button">New sound</button>
+        </div>
+        <div class="cheer" id="match-cheer" style="margin:8px 0 4px;font-weight:600;color:var(--text-dim)">Which one was that?</div>
+        <div class="match-row" id="match-row"></div>
+      </div>
+    </section>
+
+    <!-- FAMILY -->
+    <section id="screen-family" class="screen" data-screen="family">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Family</h2>
+          <div class="sub">Tap a person to hear them</div>
+        </div>
+        <button class="linkish" type="button" data-nav="day">Remy's Day</button>
+      </header>
+      <div class="grid family-grid" id="family-grid"></div>
+      <div class="wall" id="family-wall"></div>
+      <div class="record-bar" id="record-bar">
+        <span class="rec-dot"></span>
+        <span id="record-label">Recording…</span>
+        <span class="spacer"></span>
+        <button class="secondary" id="record-cancel" type="button">Cancel</button>
+        <button class="primary" id="record-stop" type="button">Save</button>
+      </div>
+    </section>
+
+
+    <!-- HEALTH -->
+    <section id="screen-health" class="screen" data-screen="health">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Health</h2>
+          <div class="sub">Check in — it is shared with family</div>
+        </div>
+        <button class="linkish" type="button" data-nav="day">Remy's Day</button>
+      </header>
+      <div class="grid health-grid" id="health-grid"></div>
+    </section>
+
+    <!-- MOOD -->
+    <section id="screen-mood" class="screen" data-screen="mood">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Mood</h2>
+          <div class="sub">How are you feeling?</div>
+        </div>
+      </header>
+      <div class="grid mood-grid" id="mood-grid"></div>
+    </section>
+
+    <!-- SLEEP -->
+    <section id="screen-sleep" class="screen" data-screen="sleep">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Sleep</h2>
+          <div class="sub">How was last night?</div>
+        </div>
+      </header>
+      <div class="grid sleep-grid" id="sleep-grid"></div>
+    </section>
+
+    <!-- MEALS -->
+    <section id="screen-meals" class="screen" data-screen="meals">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Meals</h2>
+          <div class="sub">Tap when you eat or drink</div>
+        </div>
+      </header>
+      <div class="grid meals-grid" id="meals-grid"></div>
+    </section>
+
+    <!-- MEDS -->
+    <section id="screen-meds" class="screen" data-screen="meds">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Medicine</h2>
+          <div class="sub">Tap when a dose is taken</div>
+        </div>
+      </header>
+      <div class="grid meds-grid" id="meds-grid"></div>
+    </section>
+
+    <!-- BODY -->
+    <section id="screen-body" class="screen" data-screen="body">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Sick or hurt</h2>
+          <div class="sub">Show where it does not feel right</div>
+        </div>
+      </header>
+      <div class="grid body-grid" id="body-grid"></div>
+    </section>
+
+    <!-- REMY'S DAY -->
+    <section id="screen-day" class="screen" data-screen="day">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Remy's Day</h2>
+          <div class="sub" id="day-sub">Today on this device</div>
+        </div>
+      </header>
+      <div class="day-wrap">
+        <div class="week" id="week-strip"></div>
+        <div class="timeline" id="day-timeline"></div>
+      </div>
+    </section>
+
+    <!-- ROUTINE -->
+    <section id="screen-routine" class="screen" data-screen="routine">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Daily routine</h2>
+          <div class="sub" id="routine-sub">Tap a step when it is done</div>
+        </div>
+      </header>
+      <div class="routine-progress" id="routine-progress"></div>
+      <div class="routine-list" id="routine-list"></div>
+    </section>
+
+
+    <!-- WATCH -->
+    <section id="screen-watch" class="screen" data-screen="watch">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Watch</h2>
+          <div class="sub">Approved videos, plus app shortcuts a parent turned on</div>
+        </div>
+      </header>
+      <div class="grid watch-grid" id="watch-grid"></div>
+    </section>
+
+    <!-- SCHOOL -->
+    <section id="screen-school" class="screen" data-screen="school">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>School</h2>
+          <div class="sub">Tap a task to begin</div>
+        </div>
+      </header>
+      <div class="screen-school-list" id="school-list"></div>
+    </section>
+
+    <!-- SCHOOL TASK -->
+    <section id="screen-school-task" class="screen" data-screen="school-task">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2 id="school-task-title">Task</h2>
+          <div class="sub" id="school-task-sub">Tap a step when it is done</div>
+        </div>
+      </header>
+      <div class="teacher-note hidden" id="teacher-note">
+        <div class="k">Teacher note</div>
+        <p id="teacher-note-text"></p>
+      </div>
+      <div class="routine-progress" id="school-task-progress"></div>
+      <div class="routine-list" id="school-task-steps"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="screen-settings" class="screen" data-screen="settings">
+      <header class="topbar">
+        <button class="icon-btn back" type="button" data-back aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <div>
+          <h2>Parent settings</h2>
+          <div class="sub">Shared with your family when you are signed in</div>
+        </div>
+      </header>
+      <div class="settings-wrap" id="settings-wrap">
+
+        <div class="panel" id="family-sync-panel">
+          <h3>Family sync</h3>
+          <p class="sub" id="sync-account-sub" style="margin-bottom:12px">Sign in to share photos, reminders, and Remy's day across devices.</p>
+          <div id="sync-account"></div>
+        </div>
+
+        <div class="panel" id="look-panel">
+          <h3>Look and home tiles</h3>
+          <p class="honesty-note">Choose a calm look for Remy's iPad. Changes are saved for the family and show up on his device when it syncs.</p>
+          <div class="sub" style="margin-bottom:8px">Theme</div>
+          <div class="theme-grid" id="theme-grid"></div>
+          <div class="sub" style="margin:16px 0 8px">Accent color</div>
+          <div class="accent-grid" id="accent-grid"></div>
+          <div class="sub" style="margin:16px 0 8px">Tile size</div>
+          <div class="size-row" id="size-row"></div>
+          <div class="sub" style="margin:16px 0 8px">Home tiles — show, hide, or reorder</div>
+          <div class="order-list" id="home-order"></div>
+          <div class="sub" style="margin:16px 0 8px">Custom home tiles</div>
+          <p class="honesty-note">A tile can open a section, speak a phrase, play a song, or open a link or app.</p>
+          <div id="custom-tiles-list"></div>
+          <div class="custom-tile-form look-form" id="custom-tile-form"></div>
+        </div>
+
+        <div class="panel" id="connectors-panel">
+          <h3>Connectors</h3>
+          <p class="honesty-note">These tiles open the real app or website. Remy may need to already be signed in there. This is not a login inside Remy's Music Room. Approved YouTube videos still play here, on the Watch screen.</p>
+          <div id="connectors-list"></div>
+          <div class="sub" style="margin:16px 0 8px">Add a custom connector</div>
+          <div class="look-form" id="custom-connector-form"></div>
+        </div>
+        <div class="panel">
+          <h3>Sound</h3>
+          <div class="row">
+            <div class="field">
+              <div class="slider-wrap">
+                <label for="vol">Volume <span id="vol-val">80%</span></label>
+                <input id="vol" type="range" min="0" max="100" value="80">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <div class="slider-wrap">
+                <label for="tempo-min">Slowest tempo <span id="tempo-min-val">80%</span></label>
+                <input id="tempo-min" type="range" min="60" max="120" value="80" step="5">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <div class="slider-wrap">
+                <label for="tempo-max">Fastest tempo <span id="tempo-max-val">160%</span></label>
+                <input id="tempo-max" type="range" min="100" max="200" value="160" step="5">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <span>Reduce motion</span>
+            <button class="toggle" id="reduce-motion" type="button" aria-pressed="false">Off</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Choice log</h3>
+          <div class="counts" id="log-counts"></div>
+          <div class="log-list" id="log-list"></div>
+          <div class="row">
+            <button class="secondary" id="clear-log" type="button">Clear log</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>I Want tiles</h3>
+          <div class="edit-grid" id="edit-want"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Family voices</h3>
+          <p class="sub" style="margin-bottom:12px">Record a short message for each person. Remy hears it when he taps their tile.</p>
+          <div class="edit-grid" id="edit-family"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Medicines</h3>
+          <p class="sub" style="margin-bottom:12px">A checklist Remy or a caregiver can tick. Names stay on this device. Use your own labels — nothing is prescribed here.</p>
+          <div id="edit-meds"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Daily routine</h3>
+          <p class="sub" style="margin-bottom:12px">Picture steps Remy taps when each part of the day is done.</p>
+          <div id="edit-routine"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Add something for Remy</h3>
+          <p class="sub" style="margin-bottom:12px">A song he loves, a photo, a voice message, or a planned reward. It will show as coming from you.</p>
+          <div id="contrib-form"></div>
+          <div id="contrib-list" style="margin-top:14px"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Watch</h3>
+          <p class="sub" style="margin-bottom:12px">Paste a YouTube link Remy is allowed to watch. He will only see the videos you add — there is no search. Netflix, YouTube Kids, and Disney+ open their own app or website; Netflix cannot be embedded here.</p>
+          <div id="edit-watch"></div>
+        </div>
+
+        <div class="panel">
+          <h3>School tasks</h3>
+          <p class="sub" style="margin-bottom:12px">Add a picture task with optional steps, a due date, and a teacher note.</p>
+          <div id="edit-school"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Reminders</h3>
+          <p class="sub" style="margin-bottom:12px">When this app is open, a reminder will pop up at the set time, speak the phrase, and play a soft chime. If you turn on family notifications, other signed-in devices can get a banner too.</p>
+          <div id="edit-reminders"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Family photo wall</h3>
+          <p class="sub" style="margin-bottom:12px">Add a photo and a short caption. It will show as coming from you, and Remy can react with a big emoji.</p>
+          <div id="edit-wall"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="choice-overlay" id="choice-overlay" role="dialog" aria-modal="true">
+    <div class="choice-card" id="choice-card">
+      <div class="art-lg" id="choice-art"></div>
+      <div class="word" id="choice-word"></div>
+    </div>
+  </div>
+  <div class="hold-progress" id="hold-progress">Keep holding for parent settings…</div>
+
+  <div class="player-overlay" id="player-overlay">
+    <header>
+      <button class="icon-btn" type="button" id="player-close" aria-label="Close video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <h2 id="player-title">Video</h2>
+    </header>
+    <div class="player-frame" id="player-frame"></div>
+    <div class="player-controls">
+      <button class="primary" type="button" id="player-done">All done</button>
+    </div>
+  </div>
+
+  <div class="reminder-overlay" id="reminder-overlay">
+    <div class="reminder-card" role="dialog" aria-modal="true" aria-labelledby="reminder-phrase">
+      <div class="art-lg" id="reminder-art"></div>
+      <div class="word" id="reminder-phrase">Reminder</div>
+      <button class="primary big-done" id="reminder-done" type="button">Done</button>
+    </div>
+  </div>
+
+  <div class="reward-overlay" id="reward-overlay" aria-hidden="true">
+    <div class="reward-dots" id="reward-dots"></div>
+    <div class="burst" id="reward-burst">Nice work</div>
+  </div>
+
+  
+  <div id="connector-block" class="connector-block hidden" role="dialog" aria-modal="true" aria-labelledby="connector-block-title">
+    <div class="connector-block-card">
+      <div class="art-lg" aria-hidden="true">🌙</div>
+      <div class="word" id="connector-block-title">Not right now</div>
+      <p class="sub" id="connector-block-msg"></p>
+      <button class="primary" type="button" id="connector-block-ok">OK</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/vendor/supabase.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/hum.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/push.js"></script>
+  <script src="js/customize.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
